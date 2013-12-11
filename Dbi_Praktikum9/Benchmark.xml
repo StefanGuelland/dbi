@@ -5,11 +5,11 @@
 
 <!-- verpflichtende Konfigurationsparameter -->
 	<!-- JDBC-URL für die Datenbankverbindung -->
-	<entry key="database.jdbc.url">jdbc:mariadb://localhost/tps</entry>
+	<entry key="database.jdbc.url">jdbc:mariadb://localhost/benchmark</entry>
 	<!-- JDBC-Benutzername für die Datenbankverbindung -->
-	<entry key="database.jdbc.user">dbi</entry>
+	<entry key="database.jdbc.user">root</entry>
 	<!-- JDBC-Passwort für die Datenbankverbindung -->
-	<entry key="database.jdbc.password">dbi_pass</entry>
+	<entry key="database.jdbc.password">root</entry>
 	<!-- Klasse der Datenbank (voll qualifizierter Name) -->
 	<entry key="database.class">dbi.benchmark.TransactionsForMariaDB</entry>
 	<!-- Anzahl der LoadDriver -->
@@ -17,11 +17,11 @@
 	<!-- Level für die Logs im Dateisystem -->
 	<entry key="log.level">FINE</entry>
 	<!-- Zeit der Aufwärmphase in Sekunden -->
-	<entry key="warmup.time">4</entry>
+	<entry key="warmup.time">240</entry>
 	<!-- Zeit der Benchmarkphase in Sekunden -->
-	<entry key="benchmark.time">5</entry>
+	<entry key="benchmark.time">300</entry>
 	<!-- Zeit der Ausschwingphase in Sekunden -->
-	<entry key="cooldown.time">1</entry>
+	<entry key="cooldown.time">60</entry>
 	<!-- durchschn. Verzögerung (Bedenkzeit) zwischen zwei Transaktionen in Millisekunden -->
 	<entry key="thinktime">50</entry>
 
