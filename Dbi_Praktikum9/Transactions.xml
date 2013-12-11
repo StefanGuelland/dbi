@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Transactions</comment>
+<!-- Aufzaehlung aller Transaktionen des Lastprofils -->
+<!-- angegeben wird jeweils der Methodenname und
+     eine relative Gewichtung innerhalb des Lastprofils -->
+<entry key="kontostandTransaction">35</entry>
+<entry key="einzahlungTransaction">50</entry>
+<entry key="analyseTransaction">15</entry>
+</properties>

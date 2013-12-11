@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Benchmark</comment>
+
+<!-- verpflichtende Konfigurationsparameter -->
+	<!-- JDBC-URL für die Datenbankverbindung -->
+	<entry key="database.jdbc.url">jdbc:mariadb://localhost/tps</entry>
+	<!-- JDBC-Benutzername für die Datenbankverbindung -->
+	<entry key="database.jdbc.user">dbi</entry>
+	<!-- JDBC-Passwort für die Datenbankverbindung -->
+	<entry key="database.jdbc.password">dbi_pass</entry>
+	<!-- Klasse der Datenbank (voll qualifizierter Name) -->
+	<entry key="database.class">dbi.benchmark.TransactionsForMariaDB</entry>
+	<!-- Anzahl der LoadDriver -->
+	<entry key="loaddrivers">1</entry>
+	<!-- Level für die Logs im Dateisystem -->
+	<entry key="log.level">FINE</entry>
+	<!-- Zeit der Aufwärmphase in Sekunden -->
+	<entry key="warmup.time">4</entry>
+	<!-- Zeit der Benchmarkphase in Sekunden -->
+	<entry key="benchmark.time">5</entry>
+	<!-- Zeit der Ausschwingphase in Sekunden -->
+	<entry key="cooldown.time">1</entry>
+	<!-- durchschn. Verzögerung (Bedenkzeit) zwischen zwei Transaktionen in Millisekunden -->
+	<entry key="thinktime">50</entry>
+
+<!-- optionale benutzerdefinierte Konfigurationsparameter user.* -->
+	<!-- Skalierungsfaktor n -->
+	<entry key="user.n">10</entry>
+</properties>

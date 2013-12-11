@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>RMI</comment>
+<!-- Port der RMI-Registry (Standard: 1099) -->
+<entry key="registry.port">1099</entry>
+<!-- Host der RMI-Registry -->
+<entry key="registry.host">127.0.0.1</entry>
+</properties>
