@@ -1,5 +1,6 @@
 package dbi.benchmark;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -54,11 +55,15 @@ public class TransactionsForMariaDB extends Database
 		}
 	}
 	
-	public void KontostandTX(String accid) throws SQLException
+	public long KontostandTX(String accid) throws SQLException
 	{
+		long balance = 0;
 		Statement statement = connection.createStatement();
-		statement.executeQuery("SELECT balance FROM accounts WHERE accid=" + accid + ";");
+		ResultSet result = statement.executeQuery("SELECT balance FROM accounts WHERE accid=" + accid + ";");
+		if(result.next())
+			balance = result.getLong(1);
 		statement.close();
+		return balance;
 		
 	}
 	
