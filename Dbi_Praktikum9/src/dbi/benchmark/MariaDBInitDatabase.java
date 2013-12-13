@@ -24,6 +24,11 @@ public class MariaDBInitDatabase
 	protected static Configuration config;
 	
 	/**
+	 * Skalierungsfaktor fuer die Groesse der Datenbank
+	 */
+	protected static int n;
+	
+	/**
 	 * Stellt eine Datenbankverbindung her und deaktiviert AutoCommit.
 	 * Die ben�tigte JDBC-URL wird aus der Konfiguration gelesen.
 	 * 
@@ -39,6 +44,7 @@ public class MariaDBInitDatabase
 		{
 			connection = DriverManager.getConnection(config.getBenchmarkProperty("database.jdbc.url"));
 		}
+		n = Integer.parseInt(config.getBenchmarkProperty("user.n"));
 		connection.setAutoCommit(false);
 	}
 	
@@ -143,7 +149,6 @@ public class MariaDBInitDatabase
 		Statement statement = connection.createStatement();
 		Random randomGenerator = new Random();
 		int randomNumber;
-		int n = 10;
 
 		connection.setAutoCommit(false);
 		statement.executeUpdate("SET foreign_key_checks=0;");
@@ -154,7 +159,7 @@ public class MariaDBInitDatabase
 							+ i
 							+ " , 'qwertyuiopqwertyuiop', 0, 'qwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyuiopqw');");
 		long nFactor = n * 100000;
-		for (int i = 1; i < nFactor;) {
+		for (int i = 1; i < nFactor; i += 100) {
 			randomNumber = randomGenerator.nextInt(n) + 1;
 			StringBuffer request = new StringBuffer(
 					"INSERT INTO accounts  VALUES ");
@@ -172,11 +177,10 @@ public class MariaDBInitDatabase
 						+ ", 'qwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyuiopqwertyui')");
 			}
 			request.append(";");
-			i += 100;
 			statement.executeUpdate(request.toString());
 		}
 		nFactor = n * 10;
-		for (int i = 1; i < nFactor; i++) {
+		for (int i = 1; i <= nFactor; i++) {
 			randomNumber = randomGenerator.nextInt(n) + 1;
 			statement
 					.executeUpdate("INSERT INTO tellers  VALUES ("

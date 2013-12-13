@@ -27,5 +27,5 @@
 
 <!-- optionale benutzerdefinierte Konfigurationsparameter user.* -->
 	<!-- Skalierungsfaktor n -->
-	<entry key="user.n">10</entry>
+	<entry key="user.n">50</entry>
 </properties>
