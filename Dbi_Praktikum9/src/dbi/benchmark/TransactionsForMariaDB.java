@@ -34,6 +34,8 @@ public class TransactionsForMariaDB extends Database
 
 		// Liest einen benutzerdefinierten Parameter aus der Konfiguration aus
 		n = Integer.parseInt(config.getBenchmarkProperty("user.n"));
+		// Alle Transaktionen werden manuell commitet
+		connection.setAutoCommit(false);
 	}
 
 	/**
@@ -130,7 +132,7 @@ public class TransactionsForMariaDB extends Database
         res.next();
           
         statement.close();
-          
+        connection.commit();
         return res.getInt(1);
     } 
 	
