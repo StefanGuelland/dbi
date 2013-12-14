@@ -123,7 +123,8 @@ public class MariaDBInitDatabase
 						+ "  KEY `branchid` (`branchid`), "
 						+ "  CONSTRAINT `history_ibfk_1` FOREIGN KEY (`accid`) REFERENCES `accounts` (`accid`), "
 						+ "  CONSTRAINT `history_ibfk_2` FOREIGN KEY (`tellerid`) REFERENCES `tellers` (`tellerid`), "
-						+ "  CONSTRAINT `history_ibfk_3` FOREIGN KEY (`branchid`) REFERENCES `branches` (`branchid`) "
+						+ "  CONSTRAINT `history_ibfk_3` FOREIGN KEY (`branchid`) REFERENCES `branches` (`branchid`), "
+						+ "  INDEX(delta)"
 						+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		statement.close();
 	}
