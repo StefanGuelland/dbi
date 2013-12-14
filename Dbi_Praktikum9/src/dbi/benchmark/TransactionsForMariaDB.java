@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import de.whs.dbi.loaddriver.Database;
+import de.whs.dbi.loaddriver.ParameterGenerator;
 import de.whs.dbi.util.Configuration;
 
 /**
@@ -15,7 +16,12 @@ import de.whs.dbi.util.Configuration;
  * Lasttransaktionen sind als parameterlose public-void-Methoden zu realisieren.
  */
 public class TransactionsForMariaDB extends Database
-{
+{	
+	/**
+	 * Benutzerdefinierter Konfigurationsparameter n
+	 */
+	protected final int n;
+	
 	/**
 	 * Der Konstruktor initialisiert die Datenbankverbindung.
 	 * 
@@ -25,46 +31,48 @@ public class TransactionsForMariaDB extends Database
 	public TransactionsForMariaDB(Configuration config) throws Exception
 	{
 		super(config);
+
+		// Liest einen benutzerdefinierten Parameter aus der Konfiguration aus
+		n = Integer.parseInt(config.getBenchmarkProperty("user.n"));
 	}
 
 	/**
-	 * Eine Transaktion, die in der Konfiguration als Beispiel definiert ist.
+	 * Generiert zufaellige Eingeabeparameter und ruft die kontostandTX Funktion.
+	 * @throws SQLException 
 	 */
-	public void kontostandTransaction()
+	public void kontostandTransaction() throws SQLException
 	{
-		try {
-			KontostandTX("22");
-		} catch (SQLException e) {
-			// TODO Automatisch generierter Erfassungsblock
-			e.printStackTrace();
-		}
+		int accountID = ParameterGenerator.generateRandomInt(1,n*100000);
+		KontostandTX(accountID);
 	}
 	
-	public void einzahlungTransaction()
+	/**
+	 * Generiert zufaellige Eingeabeparameter und ruft die einzahlungTX Funktion.
+	 * @throws SQLException 
+	 */	
+	public void einzahlungTransaction() throws SQLException
     {
-        int kontostand;
-        try {
-            kontostand=einzahlungTX("3","1","2",500);
+		int accountID = ParameterGenerator.generateRandomInt(1,n*100000);
+		int tellerID = ParameterGenerator.generateRandomInt(1,n*10);
+		int branchID = ParameterGenerator.generateRandomInt(1,n);
+		int delta = ParameterGenerator.generateRandomInt(1,10000);
+		
+        int kontostand=einzahlungTX(accountID,tellerID,branchID,delta);
               
-            System.out.println(kontostand);
-              
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            //System.out.println(kontostand);
     } 
 	
-	public void analyseTransaction()
+	/**
+	 * Generiert zufaellige Eingeabeparameter und ruft die analyseTX Funktion.
+	 * @throws SQLException 
+	 */	
+	public void analyseTransaction() throws SQLException
 	{
-		try {
-			analyseTX(100);
-		} catch (SQLException e) {
-			// TODO Automatisch generierter Erfassungsblock
-			e.printStackTrace();
-		}
+		int delta = ParameterGenerator.generateRandomInt(1,10000);
+		analyseTX(delta);
 	}
 	
-	public long KontostandTX(String accid) throws SQLException
+	public long KontostandTX(int accid) throws SQLException
 	{
 		long balance = 0;
 		Statement statement = connection.createStatement();
@@ -76,7 +84,7 @@ public class TransactionsForMariaDB extends Database
 		
 	}
 	
-	public int einzahlungTX(String accid, String tellerid, String branchid, int delta) throws SQLException
+	public int einzahlungTX(int accid, int tellerid, int branchid, int delta) throws SQLException
     {
         Statement statement = connection.createStatement();
         /**
