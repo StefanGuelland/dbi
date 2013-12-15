@@ -1,5 +1,6 @@
 package dbi.benchmark;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +23,19 @@ public class TransactionsForMariaDB extends Database
 	 */
 	protected final int n;
 	
+	protected PreparedStatement selectBalanceAccounts;
+	
+	protected PreparedStatement einzahlungTXSelectBalanceFromBranches;
+	protected PreparedStatement einzahlungTXUpdateBalanceFromBranches;	
+	protected PreparedStatement einzahlungTXSelectBalanceFromTellers;
+	protected PreparedStatement einzahlungTXUpdateBalanceFromTellers;
+	protected PreparedStatement einzahlungTXSelectBalanceFromAccounts;
+	protected PreparedStatement einzahlungTXInsertHistory;
+	protected PreparedStatement einzahlungTXUpdateBalanceFromAccounts;
+	
+	
+	protected PreparedStatement analyseTXSelectDelta;
+	
 	/**
 	 * Der Konstruktor initialisiert die Datenbankverbindung.
 	 * 
@@ -36,6 +50,15 @@ public class TransactionsForMariaDB extends Database
 		n = Integer.parseInt(config.getBenchmarkProperty("user.n"));
 		// Alle Transaktionen werden manuell commitet
 		connection.setAutoCommit(false);
+		selectBalanceAccounts = connection.prepareStatement("SELECT balance FROM accounts WHERE accid=?;");
+		einzahlungTXSelectBalanceFromBranches = connection.prepareStatement("SELECT balance FROM branches WHERE branchid=?;");
+		einzahlungTXUpdateBalanceFromBranches = connection.prepareStatement("UPDATE branches SET balance=? WHERE branchid=?;");
+		einzahlungTXSelectBalanceFromTellers = connection.prepareStatement("SELECT balance FROM tellers WHERE tellerid=?;");
+		einzahlungTXUpdateBalanceFromTellers = connection.prepareStatement("UPDATE tellers SET balance=? WHERE tellerid=?;");
+		einzahlungTXSelectBalanceFromAccounts = connection.prepareStatement("SELECT balance FROM accounts WHERE accid=?;");
+		einzahlungTXUpdateBalanceFromAccounts = connection.prepareStatement("UPDATE accounts SET balance=? WHERE accid=?;");
+		einzahlungTXInsertHistory = connection.prepareStatement("INSERT INTO history VALUES (?,?,?,?,?,?)");
+		analyseTXSelectDelta = connection.prepareStatement("SELECT count(*) FROM history WHERE delta=?;");
 	}
 
 	/**
@@ -77,27 +100,31 @@ public class TransactionsForMariaDB extends Database
 	public long KontostandTX(int accid) throws SQLException
 	{
 		long balance = 0;
-		Statement statement = connection.createStatement();
-		ResultSet result = statement.executeQuery("SELECT balance FROM accounts WHERE accid=" + accid + ";");
+		selectBalanceAccounts.setInt(1, accid);
+		
+		//Statement statement = connection.createStatement();
+		ResultSet result =  selectBalanceAccounts.executeQuery();
 		if(result.next())
 			balance = result.getLong(1);
-		statement.close();
+		//statement.close();
 		return balance;
 		
 	}
 	
 	public int einzahlungTX(int accid, int tellerid, int branchid, int delta) throws SQLException
     {
-        Statement statement = connection.createStatement();
         /**
          * balance in branches mit der speziellen branchid aktualisieren
          */
-        ResultSet res = statement.executeQuery("SELECT balance FROM branches WHERE branchid='" + branchid + "'");
-          
+        einzahlungTXSelectBalanceFromBranches.setInt(1, branchid);
+        ResultSet res = einzahlungTXSelectBalanceFromBranches.executeQuery();
+
         /* Abfrage ob ein Eintrag verfügbar ist. */
         if(res.next()){
           
-            statement.executeQuery("UPDATE branches SET balance=" + (delta+res.getInt(1)) + " WHERE branchid='" + branchid + "';");
+        	einzahlungTXUpdateBalanceFromBranches.setInt(1, delta + res.getInt(1));
+        	einzahlungTXUpdateBalanceFromBranches.setInt(2, branchid);
+        	einzahlungTXUpdateBalanceFromBranches.executeUpdate();
         }
         else
             return 0; /* Rückgabe bei Fehler in Datenbank - ÄNDERN -> throw? return 0? */
@@ -105,10 +132,13 @@ public class TransactionsForMariaDB extends Database
         /**
          * balance in tellers mit der speziellen tellerid aktualisieren
          */
-        res = statement.executeQuery("SELECT balance FROM tellers WHERE tellerid='" + tellerid + "';");
+        einzahlungTXSelectBalanceFromTellers.setInt(1, tellerid);
+        res = einzahlungTXSelectBalanceFromTellers.executeQuery();
           
         if(res.next()){
-            statement.executeQuery("UPDATE tellers SET balance=" + (delta+res.getInt(1)) + " WHERE tellerid='" + tellerid + "';");
+        	einzahlungTXUpdateBalanceFromTellers.setInt(1,delta+res.getInt(1));
+        	einzahlungTXUpdateBalanceFromTellers.setInt(2, tellerid);
+        	einzahlungTXUpdateBalanceFromTellers.executeUpdate();
         }
         else
             return 0;
@@ -116,31 +146,38 @@ public class TransactionsForMariaDB extends Database
         /**
          * balance in accounts mit der speziellen accid aktualisieren
          */
-        res = statement.executeQuery("SELECT balance FROM accounts WHERE accid='" + accid + "';");
+        einzahlungTXSelectBalanceFromAccounts.setInt(1, tellerid);
+        res = einzahlungTXSelectBalanceFromAccounts.executeQuery();
           
         if(res.next()){
-            statement.executeQuery("UPDATE accounts SET balance=" + (delta+res.getInt(1)) + " WHERE accid='" + accid + "';");
+            einzahlungTXUpdateBalanceFromAccounts.setInt(1,delta+res.getInt(1));
+        	einzahlungTXUpdateBalanceFromAccounts.setInt(2, accid);
+        	einzahlungTXUpdateBalanceFromAccounts.executeUpdate();
+            
         }
         else
             return 0;
-        statement.executeQuery("INSERT INTO history VALUES ('"+ accid +"','"+ tellerid +"',"+ delta +",'"+ branchid +"','"+ res.getInt(1) +"','"+ "x" +"')");//cmmnt char
-          
-        /**
-         * akutelles balance aus der datenbank ziehen
-         */
-        res = statement.executeQuery("SELECT balance FROM accounts WHERE accid='" + accid + "';");
-        res.next();
-          
-        statement.close();
+        einzahlungTXInsertHistory.setInt(1, accid);
+        einzahlungTXInsertHistory.setInt(2, tellerid);
+        einzahlungTXInsertHistory.setInt(3, delta);
+        einzahlungTXInsertHistory.setInt(4, branchid);
+        einzahlungTXInsertHistory.setInt(5, res.getInt(1));
+        einzahlungTXInsertHistory.setString(6,"lala");
+        einzahlungTXInsertHistory.executeUpdate();
+       
         connection.commit();
-        return res.getInt(1);
+        return delta+res.getInt(1);
     } 
 	
-	public void analyseTX(long delta) throws SQLException
+	public int analyseTX(int delta) throws SQLException
 	{
-		Statement statement = connection.createStatement();
-		statement.executeQuery("SELECT count(*) FROM history WHERE delta=" + delta + ";");
-		statement.close();
+		int count = 0;
+		analyseTXSelectDelta.setInt(1, delta);
+		ResultSet result = analyseTXSelectDelta.executeQuery();
+		if(result.next())
+			count = result.getInt(1);
+		return count;
+		
 	}
 
 }
