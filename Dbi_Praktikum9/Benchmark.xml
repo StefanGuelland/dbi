@@ -15,7 +15,7 @@
 	<!-- Anzahl der LoadDriver -->
 	<entry key="loaddrivers">1</entry>
 	<!-- Level für die Logs im Dateisystem -->
-	<entry key="log.level">FINE</entry>
+	<entry key="log.level">SEVERE</entry>
 	<!-- Zeit der Aufwärmphase in Sekunden -->
 	<entry key="warmup.time">240</entry>
 	<!-- Zeit der Benchmarkphase in Sekunden -->
