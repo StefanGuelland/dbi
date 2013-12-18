@@ -137,7 +137,35 @@ public class MariaDBInitDatabase
 	 */
 	protected static void tuneDatabase() throws SQLException 
 	{
-		
+		Statement statement = connection.createStatement();
+		statement.execute("drop procedure if exists `kontostand`;");
+		statement.execute("drop procedure if exists `einzahlung`;");
+		statement.execute("drop procedure if exists `analyse`;");
+		statement.execute(
+				"CREATE  PROCEDURE `kontostand`(IN accid_ INT, OUT balance_ INT) " +
+				"BEGIN " +
+				"SELECT balance FROM accounts WHERE accid=accid_ INTO balance_; " +
+				"END"
+				);
+		statement.execute(
+				"CREATE PROCEDURE `einzahlung`(IN accid_ INT, IN tellerid_ INT, IN branchid_ INT, IN delta_ INT, IN comment_ char(30), OUT newBalance INT) " +
+				"BEGIN " +
+				"START TRANSACTION; " +
+				"UPDATE branches SET balance=balance + delta_ WHERE branchid=branchid_; " +
+				"UPDATE tellers SET balance=balance + delta_ WHERE tellerid=tellerid_; " +
+				"UPDATE accounts SET balance=balance + delta_ WHERE accid=accid_; " +
+				"SELECT balance FROM accounts WHERE accid=accid_ INTO newBalance; " +
+				"INSERT INTO history VALUES (accid_,tellerid_,delta_,branchid_,newBalance, comment_); " +
+				"COMMIT; " +
+				"END"
+				);
+		statement.execute(
+				"CREATE PROCEDURE `analyse`(IN delta_ INT, OUT count_ INT) " +
+				"BEGIN " +
+				"SELECT count(*) FROM history WHERE delta=delta_ INTO count_; " +
+				"END"
+				);
+		statement.close();
 	}
 
 	/**
